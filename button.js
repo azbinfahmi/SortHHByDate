@@ -21,14 +21,14 @@ function handleDateSelectChange(selectElement) {
     const selectedValue = selectElement.value;
     selectedDateString_2.innerHTML =''
     //cari index ke berapa
-    for (var i in uniqueDates){
+    for (var i = 0; i< uniqueDates.length; i++){
         if(selectedValue == uniqueDates[i]){
             index = Number(i)
             break;
         }
     }
     //display value untuk date  Range
-    for(var i in uniqueDates){
+    for(var i = 0; i< uniqueDates.length; i++){
         if( i >= index){
             const option = document.createElement('option');
             option.value = uniqueDates[i];
@@ -42,8 +42,9 @@ function handleDateSelectChange_2(selectElement){
     RangeDate =[]
     TotalDays = 1
     const selectedValue = selectElement.value;
-    for (var i in uniqueDates){
+    for (var i = 0; i< uniqueDates.length; i++){
         if( i >= index){
+            console.log('i',i,'\nindex',index)
             RangeDate.push(formattedStringToExcelDate(uniqueDates[i]))
         }
         if(selectedValue == uniqueDates[i]){
@@ -52,5 +53,5 @@ function handleDateSelectChange_2(selectElement){
         }
     }
     RangeDate = RangeDate.flat()
-    //console.log('RangeDate: ',RangeDate)    
+    console.log('RangeDate: ',RangeDate)    
 }

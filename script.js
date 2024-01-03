@@ -153,7 +153,6 @@ function formattedStringToExcelDate(formattedDate) {
     return utcDays;
 }
 
-
 function showRowsAndSheets() {
     TotalNumColumn =[]
     const selectedDateString = document.getElementById('dateSelect').value;
@@ -294,7 +293,7 @@ function showRowsAndSheets() {
 
     //to display Header in table
     for(var i in RangeDate){
-        index = Number(i) + 1
+        const index = Number(i) + 1
         date = excelDateToFormattedString(RangeDate[i])
         const headerCell2 = headerRow.insertCell(index)
         headerCell2.textContent = date;
