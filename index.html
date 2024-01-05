@@ -9,7 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
 </head>
 <body>
-    <table >
+    <table>
         <tr>
             <td> <input type="file" id="fileInput" accept=".zip"> </td>
             <td> <label for="dateSelect">Select Date:</label> </td>
@@ -27,17 +27,39 @@
         </tr>
     </table>
     <br><br>
-    <table style="width: 700px; border-collapse:collapse" id="resultTable" border="1" >
-        <thead>
-            <tr>
-                <th>SG number</th>
-                <th>Total Completed HandHole</th>
-                <th>Producer</th>
-                <th>Date</th>
-            </tr>
-        </thead>
-        <tbody id="resultBody"></tbody>
-    </table>
+
+    <div style="display: flex; width: 100%;">
+        <div style="width: 700px; ">
+            <table style="width: 100%; border-collapse:collapse" id="resultTable" border="1">
+                <thead>
+                    <tr>
+                        <th>SG number</th>
+                        <th>Total Completed HandHole</th>
+                        <th>Producer</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="resultBody"></tbody>
+            </table>
+        </div>
+    
+        <div style="width: 900px; max-width: 1000px; padding-left: 100px;">
+            <table style=" width: 100%; border-collapse:collapse" border="1" id="areaTable">
+                <thead>
+                    <tr>
+                        <th>Area</th>
+                        <th>Date</th>
+                        <th>Total HandHole (Y)</th>
+                        <th>Total HandHole (N)</th>
+                        <th>Total HandHole (Others/Echo)</th>
+                        <th>Total</th>      
+                    </tr>
+                </thead>
+                <tbody id="areaBody"></tbody>
+            </table>
+        </div>
+    </div>    
+    
     <br><br><br>
     <script src="script.js"></script>
     <script src="button.js"></script>

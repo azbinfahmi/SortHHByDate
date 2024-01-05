@@ -17,3 +17,7 @@
 .dark-right-border {
     border-right: 2px solid black; /* Adjust the border style and color as needed */
 }
+
+.no-wrap {
+    white-space: nowrap;
+  }

@@ -1,4 +1,4 @@
-var index = 0, index_2 = 0, TotalDays = 1, RangeDate =[]
+var index = 0, index_2 = 0, RangeDate =[]
 
 function toggleDateRange(){
     const rangeSelect = document.querySelector('.Range');
@@ -40,11 +40,9 @@ function handleDateSelectChange(selectElement) {
 
 function handleDateSelectChange_2(selectElement){
     RangeDate =[]
-    TotalDays = 1
     const selectedValue = selectElement.value;
     for (var i = 0; i< uniqueDates.length; i++){
         if( i >= index){
-            console.log('i',i,'\nindex',index)
             RangeDate.push(formattedStringToExcelDate(uniqueDates[i]))
         }
         if(selectedValue == uniqueDates[i]){
@@ -53,5 +51,5 @@ function handleDateSelectChange_2(selectElement){
         }
     }
     RangeDate = RangeDate.flat()
-    console.log('RangeDate: ',RangeDate)    
+    //console.log('RangeDate: ',RangeDate)    
 }

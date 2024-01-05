@@ -1,7 +1,8 @@
 var workbooks,uniqueDates =[],TotalNumColumn =[],New_TotalNumColumn=[];
-var TotalY = 0, SumValue = 0, totalNew = 0, matchingRows_copy=[]
-document.getElementById('fileInput').addEventListener('change', handleFileInputChange);
+var TotalY = 0, SumValue = 0, matchingRows_copy=[]
+let FileNames =[], DateByArea=[]
 
+document.getElementById('fileInput').addEventListener('change', handleFileInputChange);
 async function readZipFile(file) {
     try {
         const zip = new JSZip();
@@ -13,6 +14,7 @@ async function readZipFile(file) {
         // Process each file in the zip
         for (const [relativePath, zipEntry] of Object.entries(zipData.files)) {
             if (zipEntry.name.endsWith('.xlsx')) {
+                FileNames.push(zipEntry.name.replace('.xlsx', ''))
                 // Read and process the Excel file
                 const arrayBuffer = await zipEntry.async('arraybuffer');
                 const data = new Uint8Array(arrayBuffer);
@@ -30,7 +32,6 @@ async function readZipFile(file) {
 async function handleFileInputChange() {
     const fileInput = document.getElementById('fileInput');
     const file = fileInput.files[0];
-
     if (file) {
         try {
             if (file.name.endsWith('.zip')) {
@@ -61,7 +62,9 @@ async function populateDateDropdown(workbooks) {
     uniqueDates = [];
 
     // Process each workbook in the array
+    let count = 0
     for (const workbook of workbooks) {
+        let DateByArea_scope = [], total_y =0, total_n =0,total_o = 0
         // Process each sheet in the workbook
         for (const sheetName of workbook.SheetNames) {
             const worksheet = workbook.Sheets[sheetName];
@@ -74,16 +77,43 @@ async function populateDateDropdown(workbooks) {
                     if (row['Passthrough'] === 'Y' || row['Passthrough'] === 'y') {
                         TotalY = TotalY + 1;
                         const dateValue = row['Complete Date']
-
+                        const producerValue = row['Producer']
                         if (dateValue && !uniqueDates.includes(dateValue)) {
                             uniqueDates.push(dateValue);
                         }
-                    } else {
-                        totalNew = totalNew + 1;
+                        if (dateValue && !DateByArea_scope.includes(dateValue)) {
+                            DateByArea_scope.push(dateValue)
+                        }
+
+                        if(producerValue != "ECHO" && producerValue && "OTHER PARTIES" && producerValue != "OTHER PARTY"){
+                            total_y = total_y + 1
+                        }
+
+                        else{
+                            total_o = total_o + 1
+                        }
+                    } 
+                    else if(row['Passthrough'] === 'n' || row['Passthrough'] === 'N'){
+                        const producerValue = row['Producer']
+
+                        if(producerValue != "ECHO" || producerValue != "OTHER PARTIES" || producerValue != "OTHER PARTY"){
+                            total_n = total_n + 1
+                        }
+
+                        else{
+                            total_o = total_o + 1
+                        }
                     }
                 });
             }
         }
+
+        
+        for(var i in DateByArea_scope.sort()){
+            DateByArea_scope[i] = excelDateToFormattedString(DateByArea_scope[i])
+        }
+        DateByArea.push([FileNames[count],[DateByArea_scope[0],DateByArea_scope[DateByArea_scope.length - 1]], total_y, total_n,total_o])
+        count+= 1
     }
 
     // Sort dates in ascending order
@@ -106,6 +136,79 @@ async function populateDateDropdown(workbooks) {
         option.textContent = date;
         TodateSelect.appendChild(option);
     });
+
+    //insert area table
+    console.log('DateByArea',DateByArea)
+    const AreaTableBody = document.getElementById('areaBody');
+    AreaTableBody.innerHTML = ''
+
+    if (DateByArea) {
+        const totalHHColumn=[]
+        for(let index = 0; index<DateByArea.length; index++){
+            const newRow = AreaTableBody.insertRow();
+            const cell1 = newRow.insertCell(0);
+            cell1.textContent = DateByArea[index][0];
+            cell1.style.textAlign = 'center';
+            cell1.style.padding = '5px';
+            cell1.classList.add('no-wrap');
+            
+            const cell2 = newRow.insertCell(1);
+            cell2.textContent = DateByArea[index][1].map(date => date.replace(/,\s\d{4}\b/, '')).join(' - ');
+            cell2.style.textAlign = 'center';
+            cell2.style.padding = '5px';
+            cell2.classList.add('no-wrap');
+
+            const cell3 = newRow.insertCell(2);
+            cell3.textContent = DateByArea[index][2];
+            cell3.style.textAlign = 'center';
+            cell3.style.padding = '5px';
+            cell3.classList.add('no-wrap');
+
+            const cell4 = newRow.insertCell(3);
+            cell4.textContent = DateByArea[index][3];
+            cell4.style.textAlign = 'center';
+            cell4.style.padding = '5px';
+            cell4.classList.add('no-wrap');
+
+            const cell5 = newRow.insertCell(4);
+            cell5.textContent = DateByArea[index][4];
+            cell5.style.textAlign = 'center';
+            cell5.style.padding = '5px';
+            cell5.classList.add('no-wrap');
+
+            const cell6 = newRow.insertCell(5);
+            let total = DateByArea[index][2]+DateByArea[index][3]+DateByArea[index][4]
+            cell6.textContent = total;
+            cell6.style.textAlign = 'center';
+            cell6.style.padding = '5px';
+            cell6.classList.add('no-wrap');
+
+            if(index == 0){
+                totalHHColumn.push(DateByArea[index][2],DateByArea[index][3],DateByArea[index][4],total)
+            }
+            else{
+                totalHHColumn[0] = totalHHColumn[0] + DateByArea[index][2]
+                totalHHColumn[1] = totalHHColumn[1] + DateByArea[index][3]
+                totalHHColumn[2] = totalHHColumn[2] + DateByArea[index][4]
+                totalHHColumn[3] = totalHHColumn[3] + total
+            }
+        }
+
+        const newRow = AreaTableBody.insertRow();
+        for(let i =0; i< totalHHColumn.length +2; i++){
+            const cell1 = newRow.insertCell(i);
+            if(i<2){
+                cell1.textContent = "";
+            }
+            else{
+                cell1.textContent = totalHHColumn[i-2];
+                cell1.style.textAlign = 'center';
+                cell1.style.padding = '5px';
+                cell1.style.fontWeight = 'bold';
+            }
+            
+        } 
+    }   
 }
 
 function getColumnIndexByName(sheet, columnName) {
@@ -181,7 +284,7 @@ function showRowsAndSheets() {
                         }
 
                         return excelDateNumeric === selectedDateNumeric && passthroughValue.toLowerCase() === 'y' && ProducerValue.toLowerCase() != 'other parties' 
-                        && ProducerValue.toLowerCase() != 'echo' && ProducerValue.toLowerCase() != 'other party'
+                        && ProducerValue.toLowerCase() != 'other party' && ProducerValue.toLowerCase() != 'echo'
                     });
     
                     if (matchingRows.length > 0) {
@@ -277,7 +380,7 @@ function showRowsAndSheets() {
       console.log('producerTotalsByDate ',producerTotalsByDate )
 
     const producerTable = document.createElement('table');
-    producerTable.id = 'producerTable'; 
+    producerTable.id = 'producerTable';
     producerTable.style.borderCollapse = 'collapse';
     producerTable.style.border = '2px solid black'; 
     const tableBody = document.createElement('tbody');
