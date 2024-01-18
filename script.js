@@ -1,6 +1,6 @@
 var workbooks,uniqueDates =[],TotalNumColumn =[],New_TotalNumColumn=[];
 var TotalY = 0, SumValue = 0, matchingRows_copy=[]
-let FileNames =[], DateByArea=[]
+let FileNames =[], DateByArea=[], arr_totalHH =[]
 
 document.getElementById('fileInput').addEventListener('change', handleFileInputChange);
 async function readZipFile(file) {
@@ -64,7 +64,7 @@ async function populateDateDropdown(workbooks) {
     // Process each workbook in the array
     let count = 0
     for (const workbook of workbooks) {
-        let DateByArea_scope = [], total_y =0, total_n =0,total_o = 0
+        let DateByArea_scope = [], total_y =0, total_n =0,total_o = 0, calcTotalHH =0
         // Process each sheet in the workbook
         for (const sheetName of workbook.SheetNames) {
             const worksheet = workbook.Sheets[sheetName];
@@ -72,37 +72,49 @@ async function populateDateDropdown(workbooks) {
 
             if (columnIndex !== -1) {
                 const jsonData = await readSheet(worksheet);
-
                 jsonData.forEach(row => {
-                    if (row['Passthrough'] === 'Y' || row['Passthrough'] === 'y') {
-                        TotalY = TotalY + 1;
-                        const dateValue = row['Complete Date']
-                        const producerValue = row['Producer']
-                        if (dateValue && !uniqueDates.includes(dateValue)) {
-                            uniqueDates.push(dateValue);
-                        }
-                        if (dateValue && !DateByArea_scope.includes(dateValue)) {
-                            DateByArea_scope.push(dateValue)
-                        }
-
-                        if(producerValue != "ECHO" && producerValue && "OTHER PARTIES" && producerValue != "OTHER PARTY"){
-                            total_y = total_y + 1
-                        }
-
-                        else{
-                            total_o = total_o + 1
-                        }
-                    } 
-                    else if(row['Passthrough'] === 'n' || row['Passthrough'] === 'N'){
-                        const producerValue = row['Producer']
-
-                        if(producerValue != "ECHO" || producerValue != "OTHER PARTIES" || producerValue != "OTHER PARTY"){
-                            total_n = total_n + 1
+                    if(row['Passthrough']){
+                        if (row['Passthrough'] === 'Y' || row['Passthrough'] === 'y') {
+                            TotalY = TotalY + 1;
+                            const dateValue = row['Complete Date']
+                            const producerValue = row['Producer']
+                            if (dateValue && !uniqueDates.includes(dateValue)) {
+                                uniqueDates.push(dateValue);
+                            }
+                            if (dateValue && !DateByArea_scope.includes(dateValue)) {
+                                DateByArea_scope.push(dateValue)
+                            }
+    
+                            if(producerValue != "ECHO" && producerValue != "OTHER PARTIES" && producerValue != "OTHER PARTY"){
+                                total_y = total_y + 1
+                            }
+    
+                            else{
+                                total_o = total_o + 1
+                            }
+                            calcTotalHH += 1
                         }
 
-                        else{
-                            total_o = total_o + 1
+                        else if(row['Passthrough'] === 'n' || row['Passthrough'] === 'N'){
+                            const producerValue = row['Producer']
+    
+                            if(producerValue != "ECHO" || producerValue != "OTHER PARTIES" || producerValue != "OTHER PARTY"){
+                                total_n = total_n + 1
+                            }
+    
+                            else{
+                                total_o = total_o + 1
+                            }
+                            calcTotalHH += 1
                         }
+                        
+                    }
+
+                    else if(row['Passthrough'] != 'n'){
+                        if(row['vetro_id']){
+                            calcTotalHH += 1
+                        }
+                        
                     }
                 });
             }
@@ -113,9 +125,11 @@ async function populateDateDropdown(workbooks) {
             DateByArea_scope[i] = excelDateToFormattedString(DateByArea_scope[i])
         }
         DateByArea.push([FileNames[count],[DateByArea_scope[0],DateByArea_scope[DateByArea_scope.length - 1]], total_y, total_n,total_o])
+        arr_totalHH.push(calcTotalHH)
         count+= 1
     }
 
+    console.log('arr_totalHH',arr_totalHH)
     // Sort dates in ascending order
     uniqueDates.sort();
     for(var i in uniqueDates){
@@ -177,8 +191,11 @@ async function populateDateDropdown(workbooks) {
             cell5.classList.add('no-wrap');
 
             const cell6 = newRow.insertCell(5);
-            let total = DateByArea[index][2]+DateByArea[index][3]+DateByArea[index][4]
-            cell6.textContent = total;
+            let total = DateByArea[index][2]+DateByArea[index][3] + DateByArea[index][4]
+            cell6.textContent = total +' / '+ arr_totalHH[index];
+            if( total != arr_totalHH[index]){
+                cell6.style.backgroundColor = '#b7dec3'
+            }
             cell6.style.textAlign = 'center';
             cell6.style.padding = '5px';
             cell6.classList.add('no-wrap');
