@@ -1,4 +1,4 @@
-var workbooks,uniqueDates =[],TotalNumColumn =[],New_TotalNumColumn=[];
+var workbooks, uniqueDates =[],TotalNumColumn =[],New_TotalNumColumn=[];
 var TotalY = 0, SumValue = 0, matchingRows_copy=[]
 let FileNames =[], DateByArea=[], arr_totalHH =[]
 
@@ -56,6 +56,19 @@ async function handleFileInputChange() {
 }
 
 async function populateDateDropdown(workbooks) {
+    function extractValuesAfterHyphen(strings) {
+        return strings.map(str => {
+            // Use regular expression to capture "SG-" followed by any characters until the end
+            let match = str.match(/SG-.*/);
+    
+            if (match) {
+                // Extract the matched value
+                return match[0].trim();
+            } else {
+                return null; // Handle cases where the pattern is not found
+            }
+        });
+    }
     const dateSelect = document.getElementById('dateSelect');
     dateSelect.style.display = "block"
     const TodateSelect = document.getElementById('dateSelect_2');
@@ -64,12 +77,13 @@ async function populateDateDropdown(workbooks) {
     // Process each workbook in the array
     let count = 0
     for (const workbook of workbooks) {
-        let DateByArea_scope = [], total_y =0, total_n =0,total_o = 0, calcTotalHH =0
+        let DateByArea_scope = [], total_y =0, total_n =0,total_o = 0, calcTotalHH =0, SGIP =[], SGNotdoYet =[]
         // Process each sheet in the workbook
         for (const sheetName of workbook.SheetNames) {
+            let checkY = false, checkIP = false
             const worksheet = workbook.Sheets[sheetName];
             const columnIndex = getColumnIndexByName(worksheet, 'Complete Date');
-
+            
             if (columnIndex !== -1) {
                 const jsonData = await readSheet(worksheet);
                 jsonData.forEach(row => {
@@ -92,7 +106,7 @@ async function populateDateDropdown(workbooks) {
                             else{
                                 total_o = total_o + 1
                             }
-                            calcTotalHH += 1
+                            calcTotalHH += 1, checkY = true
                         }
 
                         else if(row['Passthrough'] === 'n' || row['Passthrough'] === 'N'){
@@ -105,7 +119,7 @@ async function populateDateDropdown(workbooks) {
                             else{
                                 total_o = total_o + 1
                             }
-                            calcTotalHH += 1
+                            calcTotalHH += 1, checkY = true
                         }
                         
                     }
@@ -113,18 +127,28 @@ async function populateDateDropdown(workbooks) {
                     else if(row['Passthrough'] != 'n'){
                         if(row['vetro_id']){
                             calcTotalHH += 1
+                            checkIP = true
                         }
                         
                     }
                 });
             }
+
+            if(checkY == false && sheetName != 'Overview'){
+                SGNotdoYet.push(sheetName)
+            }
+            else if(checkIP == true){
+                SGIP.push(sheetName)
+            }
         }
 
-        
+
         for(var i in DateByArea_scope.sort()){
             DateByArea_scope[i] = excelDateToFormattedString(DateByArea_scope[i])
         }
-        DateByArea.push([FileNames[count],[DateByArea_scope[0],DateByArea_scope[DateByArea_scope.length - 1]], total_y, total_n,total_o])
+        SGIP = extractValuesAfterHyphen(SGIP)
+        SGNotdoYet = extractValuesAfterHyphen(SGNotdoYet)
+        DateByArea.push([FileNames[count],[DateByArea_scope[0],DateByArea_scope[DateByArea_scope.length - 1]], total_y, total_n,total_o,SGIP.join(', '), SGNotdoYet.join(', ')])
         arr_totalHH.push(calcTotalHH)
         count+= 1
     }
@@ -158,6 +182,7 @@ async function populateDateDropdown(workbooks) {
 
     if (DateByArea) {
         const totalHHColumn=[]
+        let sumTotal_ = 0, grandTotal_ = 0
         for(let index = 0; index<DateByArea.length; index++){
             const newRow = AreaTableBody.insertRow();
             const cell1 = newRow.insertCell(0);
@@ -197,15 +222,35 @@ async function populateDateDropdown(workbooks) {
             cell5.classList.add('no-wrap');
 
             const cell6 = newRow.insertCell(5);
-            let total = DateByArea[index][2]+DateByArea[index][3] + DateByArea[index][4]
+            let total = DateByArea[index][2] + DateByArea[index][3] + DateByArea[index][4]
             cell6.textContent = total +' / '+ arr_totalHH[index];
-            if( total != arr_totalHH[index]){
-                cell6.style.backgroundColor = '#b7dec3'
-            }
             cell6.style.textAlign = 'center';
             cell6.style.padding = '5px';
             cell6.classList.add('no-wrap');
 
+            const cell7 = newRow.insertCell(6);
+            const cell8 = newRow.insertCell(7);
+            cell7.style.textAlign = 'center';
+            cell7.style.padding = '5px';
+            //cell7.classList.add('no-wrap');
+
+            cell8.style.textAlign = 'center';
+            cell8.style.padding = '5px';
+            //cell8.classList.add('no-wrap');
+
+            if( total != arr_totalHH[index]){
+                cell6.style.backgroundColor = '#b7dec3'
+                cell7.textContent = DateByArea[index][5]
+                cell8.textContent = DateByArea[index][6]
+            }
+            else{
+                cell7.textContent = ''
+                cell8.textContent = ''
+            }
+            
+
+            sumTotal_ += total
+            grandTotal_ += arr_totalHH[index]
             if(index == 0){
                 totalHHColumn.push(DateByArea[index][2],DateByArea[index][3],DateByArea[index][4],total)
             }
@@ -218,20 +263,26 @@ async function populateDateDropdown(workbooks) {
         }
 
         const newRow = AreaTableBody.insertRow();
-        for(let i =0; i< totalHHColumn.length +2; i++){
+        for(let i =0; i < totalHHColumn.length +2; i++){
             const cell1 = newRow.insertCell(i);
             if(i<2){
                 cell1.textContent = "";
             }
             else{
-                cell1.textContent = totalHHColumn[i-2];
+                if(i == totalHHColumn.length + 1 ){
+                    cell1.textContent = `${sumTotal_} / ${grandTotal_}`;
+                }
+                else{
+                    cell1.textContent = totalHHColumn[i-2]
+                }      
                 cell1.style.textAlign = 'center';
                 cell1.style.padding = '5px';
                 cell1.style.fontWeight = 'bold';
             }
             
         } 
-    }   
+    }
+    
 }
 
 function getColumnIndexByName(sheet, columnName) {
@@ -239,8 +290,7 @@ function getColumnIndexByName(sheet, columnName) {
     if(headerRow!= undefined){
         return headerRow.findIndex(header => header === columnName);
     }
-    return -1
-    
+    return -1 
 }
 
 function readSheet(worksheet) {
@@ -313,7 +363,6 @@ function showRowsAndSheets() {
                         return excelDateNumeric === selectedDateNumeric && passthroughValue.toLowerCase() === 'y' && ProducerValue.toLowerCase() != 'other parties' 
                         && ProducerValue.toLowerCase() != 'other party' && ProducerValue.toLowerCase() != 'echo'
                     });
-    
                     if (matchingRows.length > 0) {
                         totalSumValue += matchingRows.length;
     

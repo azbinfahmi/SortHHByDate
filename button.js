@@ -1,4 +1,4 @@
-var index = 0, index_2 = 0, RangeDate =[]
+let index_1 = 0, index_2 = 0, RangeDate =[]
 
 function toggleDateRange(){
     const rangeSelect = document.querySelector('.Range');
@@ -23,26 +23,27 @@ function handleDateSelectChange(selectElement) {
     //cari index ke berapa
     for (var i = 0; i< uniqueDates.length; i++){
         if(selectedValue == uniqueDates[i]){
-            index = Number(i)
+            index_1 = Number(i)
             break;
         }
     }
+    console.log('index_1',index_1)
     //display value untuk date  Range
     for(var i = 0; i< uniqueDates.length; i++){
-        if( i >= index){
+        if( i >= index_1){
             const option = document.createElement('option');
             option.value = uniqueDates[i];
             option.textContent = uniqueDates[i];
             selectedDateString_2.appendChild(option);
         }
-    } 
+    }
 }
 
 function handleDateSelectChange_2(selectElement){
     RangeDate =[]
     const selectedValue = selectElement.value;
     for (var i = 0; i< uniqueDates.length; i++){
-        if( i >= index){
+        if( i >= index_1){
             RangeDate.push(formattedStringToExcelDate(uniqueDates[i]))
         }
         if(selectedValue == uniqueDates[i]){
