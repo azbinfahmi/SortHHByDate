@@ -167,7 +167,13 @@ async function populateDateDropdown(workbooks) {
             cell1.classList.add('no-wrap');
             
             const cell2 = newRow.insertCell(1);
-            cell2.textContent = DateByArea[index][1].map(date => date.replace(/,\s\d{4}\b/, '')).join(' - ');
+            if(DateByArea[index][1][0] == undefined || DateByArea[index][1][1] == undefined){
+                cell2.textContent = ''
+            }
+            else{
+                cell2.textContent = DateByArea[index][1].map(date => date.replace(/,\s\d{4}\b/, '')).join(' - ');
+            }
+            
             cell2.style.textAlign = 'center';
             cell2.style.padding = '5px';
             cell2.classList.add('no-wrap');
@@ -230,7 +236,11 @@ async function populateDateDropdown(workbooks) {
 
 function getColumnIndexByName(sheet, columnName) {
     const headerRow = XLSX.utils.sheet_to_json(sheet, { header: 1 })[0];
-    return headerRow.findIndex(header => header === columnName);
+    if(headerRow!= undefined){
+        return headerRow.findIndex(header => header === columnName);
+    }
+    return -1
+    
 }
 
 function readSheet(worksheet) {
