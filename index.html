@@ -1,14 +1,16 @@
+<!-- Copyright Azbin Fahmi -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Total Job completed by Date</title>
+    <title>Passthrough By Date</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
 </head>
 <body>
+    <p style="position: absolute; right: 10px;"><a href="ByArea/index.html"> Go To Passthrough By Area </a> </p>
     <table>
         <tr>
             <td> <input type="file" id="fileInput" accept=".zip"> </td>
@@ -16,8 +18,7 @@
             <td> <input type="radio" id="singleDate" name="dateType" checked onclick="toggleDateRange()">Single</td>
             <td> <input type="radio" id="dateRange" name="dateType" onclick="toggleDateRange()">Range</td>
             <td ></td>
-            <td rowspan="2" style="padding-left: 10px;"><button onclick="showRowsAndSheets()">Display Data</button></td>
-        </tr>
+            <td rowspan="2" style="padding-left: 10px;"><button onclick="showRowsAndSheets()">Display Data</button></td>        </tr>
 
         <tr>
             <td></td>

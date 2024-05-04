@@ -1,3 +1,5 @@
+//<!-- Copyright Azbin Fahmi -->
+
 var workbooks, uniqueDates =[],TotalNumColumn =[],New_TotalNumColumn=[];
 var TotalY = 0, SumValue = 0, matchingRows_copy=[]
 let FileNames =[], DateByArea=[], arr_totalHH =[]
@@ -6,7 +8,6 @@ document.getElementById('fileInput').addEventListener('change', handleFileInputC
 async function readZipFile(file) {
     try {
         const zip = new JSZip();
-
         // Read the zip file
         const zipData = await zip.loadAsync(file);
         const workbooks = [];
