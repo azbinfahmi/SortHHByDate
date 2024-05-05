@@ -1,5 +1,3 @@
-// script.js
-const items = ["Apple", "Banana", "Cherry", "Date", "Elderberry", "Fig", "Grape"];
 var selectedItems = [];
 
 document.addEventListener('click', function(event) {
@@ -16,7 +14,7 @@ function toggleDropdown() {
 
 function populateDropdown() {
   const list = document.getElementById("dropdownList");
-  items.forEach(item => {
+  FileNames.forEach(item => {
     const div = document.createElement("div");
     div.textContent = item;
     div.onclick = function() { toggleItemSelection(this, item); };
@@ -41,4 +39,4 @@ function updateInputField() {
   input.value = selectedItems.join(', '); // Join array into string separated by commas
 }
 
-populateDropdown();
+// populateDropdown();

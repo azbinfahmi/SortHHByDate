@@ -1,5 +1,5 @@
 
-let FileNames =[]
+var FileNames =[], Area= {}
 document.getElementById('fileInput').addEventListener('change', handleFileInputChange);
 
 async function readZipFile(file) {
@@ -13,6 +13,7 @@ async function readZipFile(file) {
         for (const [relativePath, zipEntry] of Object.entries(zipData.files)) {
             if (zipEntry.name.endsWith('.xlsx')) {
                 FileNames.push(zipEntry.name.replace('.xlsx', ''))
+                console.log()
                 // Read and process the Excel file
                 const arrayBuffer = await zipEntry.async('arraybuffer');
                 const data = new Uint8Array(arrayBuffer);
@@ -51,7 +52,103 @@ async function handleFileInputChange() {
         console.log('No file selected.');
     }
 }
-
 async function populateAreaDropdown(workbooks){
-    console.log(workbooks)
+    function readSheet(worksheet) {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                resolve(jsonData);
+            }, 0);
+        });
+    }
+    function separateColumnAndRow(cellRef) {
+        const matches = cellRef.match(/([A-Z]+)(\d+)/);
+        if (matches && matches.length === 3) {
+            const column = matches[1];
+            const row = parseInt(matches[2]);
+            return { column, row };
+        }
+        return null;
+    }
+    console.log('workbooks: ',workbooks)
+    // Process each workbook in the array
+    let count = 0
+    for (const workbook of workbooks){
+        Area[FileNames[count]] = {}
+        let columnField = ['sg','overall','completed', 'no splitter', 'remaining', 'remark']
+         // Process each sheet in the workbook
+         for (const sheetName of workbook.SheetNames){
+            const worksheet = workbook.Sheets[sheetName];
+            if(sheetName.toLowerCase() == 'overview'){
+                let colRowArr = []
+                console.log('worksheet: ',worksheet)
+                for (columnRow in worksheet){
+                    //console.log('columnRow: ',columnRow)
+                    if(!columnRow.includes('!')){
+                        value = worksheet[columnRow].v
+                        if (typeof value == 'string'){
+                            if(columnField.includes(value.toLowerCase())){
+                                columnField = columnField.filter(item => item !== `${value.toLowerCase()}`);
+                                const { column, row } = separateColumnAndRow(columnRow);
+                                colRowArr.push([column, row, value.toLowerCase()])
+                            }
+                        }
+                    }
+                }
+                let sgValue = null
+                for (columnRow in worksheet){
+                    if(!columnRow.includes('!')){
+                        const { column, row } = separateColumnAndRow(columnRow);
+                        for(let i=0; i < colRowArr.length; i++){
+                            let startCol = colRowArr[i][0]
+                            let startRow = colRowArr[i][1]
+                            let value = colRowArr[i][2]
+                            if(i == 0){
+                                if(startCol == column && row != startRow){
+                                    sgValue = worksheet[columnRow].v
+                                    if(sgValue.toLowerCase().includes('sg')){
+                                        Area[FileNames[count]][sgValue] = {}
+                                    }
+                                }
+                            }
+                            else{
+                                if(sgValue != null){
+                                    if(sgValue.toLowerCase().includes('sg') && startCol == column && row != startRow){
+                                        cellValue = worksheet[columnRow].v
+                                        Area[FileNames[count]][sgValue][value] = cellValue
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                for(let SG in Area[FileNames[count]]){
+                    for(let i = 1; i < colRowArr.length; i++){
+                        let value = colRowArr[i][2]
+                        if(Area[FileNames[count]][SG][value] == undefined){
+                            if(value == 'remark'){
+                                Area[FileNames[count]][SG][value] = ''
+                            }
+                            else{
+                                Area[FileNames[count]][SG][value] = 0
+                            }
+                        }
+                        else if (value == 'remaining'){
+                            if(typeof Area[FileNames[count]][SG][value] == 'string'){
+                                if(Area[FileNames[count]][SG][value].toLowerCase() == 'completed'){
+                                    Area[FileNames[count]][SG][value] = 0
+                                }
+                            }   
+                            
+                        }
+                        
+                    }
+                }
+                count += 1
+            }
+         }
+    }
+    populateDropdown() // function ni dalam dropdown.js
+    console.log('count: ',count)
+
 }
