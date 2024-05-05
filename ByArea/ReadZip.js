@@ -81,7 +81,6 @@ async function populateAreaDropdown(workbooks){
             const worksheet = workbook.Sheets[sheetName];
             if(sheetName.toLowerCase() == 'overview'){
                 let colRowArr = []
-                console.log('worksheet: ',worksheet)
                 for (columnRow in worksheet){
                     //console.log('columnRow: ',columnRow)
                     if(!columnRow.includes('!')){
@@ -150,5 +149,6 @@ async function populateAreaDropdown(workbooks){
     }
     populateDropdown() // function ni dalam dropdown.js
     console.log('count: ',count)
+    console.log('Area',Area)
 
 }
