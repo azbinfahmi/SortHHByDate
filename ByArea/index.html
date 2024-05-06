@@ -28,27 +28,13 @@
             <td ><button onclick="showRowsAndSheets()">Display Area</button></td></tr>
     </table>
     <br><br>
-    <table style="width: 80%; border-collapse:collapse; margin: 0 auto;" border="1">
-        <thead>
-            <tr>
-                <th>SG</th>
-                <th>Completed</th>
-                <th>Not Done Yet</th>
-                <th>Hold/RFI</th>
-            </tr>
-        </thead>
-        <tbody id="resultBody">
-            <tr>
-                <th colspan="4">08. St Simons Island North -2 Handhole Status</th>
-            </tr>
-            <tr>
-                <td>SG01</td>
-                <td>50</td>
-                <td>0</td>
-                <td>0</td>
-            </tr>
-        </tbody>
-    </table>
+    <div style="height: 90vh; overflow-y: auto;">
+        <table style="width: 80%; border-collapse:collapse; margin: 0 auto; padding: 5px;" border="1">
+            <tbody id="resultBody">
+            </tbody>
+        </table>
+    </div>
+    
     <script src="dropdown.js"></script>
     <script src="script.js"></script>
     <script src="ReadZip.js"></script>

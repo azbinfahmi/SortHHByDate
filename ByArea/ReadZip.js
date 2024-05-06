@@ -137,18 +137,109 @@ async function populateAreaDropdown(workbooks){
                                 if(Area[FileNames[count]][SG][value].toLowerCase() == 'completed'){
                                     Area[FileNames[count]][SG][value] = 0
                                 }
-                            }   
-                            
+                            }
                         }
-                        
                     }
                 }
                 count += 1
+                break;
             }
          }
     }
     populateDropdown() // function ni dalam dropdown.js
-    console.log('count: ',count)
-    console.log('Area',Area)
+    displayArea(selectedArea)
+}
 
+//display table
+function displayArea(selectedArea) {
+    console.log('selectedArea: ',selectedArea)
+    if(Object.keys(selectedArea).length === 0){
+        selectedArea = Area
+    }
+    let grandComplete = 0, grandNotdone = 0, grandHold = 0;
+    const resultBody = document.getElementById('resultBody');
+    resultBody.innerHTML = '';
+    
+    for (let sgArea in selectedArea) {
+        const keysRow = document.createElement("tr");
+        keysRow.innerHTML = `<th style="padding: 10px 0; background-color: #e0e8f0; cursor: pointer;">${sgArea}</th>
+        <th style="text-align: center;">Completed</th>
+        <th style="text-align: center;">Not Done Yet</th>
+        <th style="text-align: center;">Hold/RFI</th>
+        <th style="text-align: center;">Remark</th>`;
+        resultBody.appendChild(keysRow);
+
+        // Insert SG table
+        let total_completed = 0, total_notdone = 0, total_hold = 0;
+        const SG = selectedArea[sgArea];
+        const rows = [];
+        for (let sgValue in SG) {
+            let notdone = 0, hold = 0, remark = ''
+            let completed = SG[sgValue].completed + SG[sgValue]["no splitter"];
+            if (SG[sgValue].remaining > 0) {
+                if (SG[sgValue].remark) {
+                    hold = SG[sgValue].remaining;
+                    remark = SG[sgValue].remark;
+                    if(remark.toLowerCase().includes('done passthrough') || remark.toLowerCase().includes('passthrough done')){
+                        hold = 0
+                    }
+                } else {
+                    notdone = SG[sgValue].remaining;
+                }
+            }
+            if(remark.toLowerCase().includes('done passthrough')){
+                completed = 0
+            }
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td style="text-align: center;">${sgValue}</td>
+                <td style="text-align: center;">${completed}</td>
+                <td style="text-align: center;">${notdone}</td>
+                <td style="text-align: center;">${hold}</td>
+                <td style="text-align: center;">${remark}</td>`;
+            resultBody.appendChild(row);
+            rows.push(row);
+            row.style.display = 'none'
+            total_completed += completed;
+            total_notdone += notdone
+            total_hold += hold;
+            
+        }
+
+        // Add total row
+        const rowTotal = document.createElement("tr");
+        rowTotal.innerHTML = `
+            <td style="text-align: center;">Total</td>
+            <td style="text-align: center; font-weight: bold;">${total_completed}</td>
+            <td style="text-align: center; font-weight: bold;">${total_notdone}</td>
+            <td style="text-align: center; font-weight: bold; background-color: ${total_hold > 0 ? '#f7c6c6' : 'transparent'};">${total_hold}</td>
+            <td style="text-align: center;"></td>`;
+        resultBody.appendChild(rowTotal);
+
+        // Update grand totals
+        grandComplete += total_completed;
+        grandNotdone += total_notdone;
+        grandHold += total_hold;
+
+        // Toggle display of rows when keysRow is clicked
+        keysRow.addEventListener("click", function() {
+        rows.forEach(row => {
+                if (row.style.display === "none") {
+                    row.style.display = "table-row";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        });
+    }
+
+    // Add grand total row
+    const rowGrandTotal = document.createElement("tr");
+    rowGrandTotal.innerHTML = `
+            <td style="text-align: center;">Grand Total</td>
+            <td style="text-align: center; font-weight: bold;">${grandComplete}</td>
+            <td style="text-align: center; font-weight: bold;">${grandNotdone}</td>
+            <td style="text-align: center; font-weight: bold;">${grandHold}</td>
+            <td style="text-align: center;"></td>`;
+    resultBody.appendChild(rowGrandTotal);
 }
