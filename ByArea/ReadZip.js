@@ -195,7 +195,7 @@ function displayArea(selectedArea) {
                 <td style="text-align: center;">${sgValue}</td>
                 <td style="text-align: center;">${completed}</td>
                 <td style="text-align: center;">${notdone}</td>
-                <td style="text-align: center;">${hold}</td>
+                <td style="text-align: center; background-color: ${hold > 0 ? '#f7c6c6' : 'transparent'};">${hold}</td>
                 <td style="text-align: center;">${remark}</td>`;
             resultBody.appendChild(row);
             rows.push(row);
