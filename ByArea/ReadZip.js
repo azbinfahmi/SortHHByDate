@@ -188,7 +188,7 @@ function displayArea(selectedArea) {
                 }
             }
             if(remark.toLowerCase().includes('done passthrough')){
-                completed = 0
+                completed = SG[sgValue].overall
             }
             const row = document.createElement("tr");
             row.innerHTML = `
